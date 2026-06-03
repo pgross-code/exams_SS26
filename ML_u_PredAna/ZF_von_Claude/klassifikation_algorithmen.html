@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klassifikations-Algorithmen Übersicht</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #151829;
+    --surface2: #1c2038;
+    --border: rgba(255,255,255,0.07);
+    --accent1: #6ee7f7;
+    --accent2: #a78bfa;
+    --accent3: #f472b6;
+    --accent4: #34d399;
+    --accent5: #fb923c;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Ambient glow background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(110,231,247,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(167,139,250,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .page-header .label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .page-header p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Category headers */
+  .category-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 50px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .category-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .grid.wide {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  /* Color accents per group */
+  .c1::before { background: var(--accent1); }
+  .c1:hover { border-color: rgba(110,231,247,0.25); }
+
+  .c2::before { background: var(--accent2); }
+  .c2:hover { border-color: rgba(167,139,250,0.25); }
+
+  .c3::before { background: var(--accent4); }
+  .c3:hover { border-color: rgba(52,211,153,0.25); }
+
+  .c4::before { background: var(--accent5); }
+  .c4:hover { border-color: rgba(251,146,60,0.25); }
+
+  .c5::before { background: var(--accent3); }
+  .c5:hover { border-color: rgba(244,114,182,0.25); }
+
+  /* Emoji icon */
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+    line-height: 1;
+  }
+
+  /* Algorithm name */
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* Divider */
+  .card hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+
+  /* Main description */
+  .card-desc {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Tags row */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* Pros/Cons mini section */
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .pros, .cons {
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .pros {
+    background: rgba(52,211,153,0.07);
+    border: 1px solid rgba(52,211,153,0.15);
+  }
+
+  .cons {
+    background: rgba(244,114,182,0.07);
+    border: 1px solid rgba(244,114,182,0.15);
+  }
+
+  .pros .mini-label { color: #34d399; font-weight: 600; margin-bottom: 4px; display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .cons .mini-label { color: #f472b6; font-weight: 600; margin-bottom: 4px; display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* Analogy box */
+  .analogy {
+    margin-top: 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: #a0aec0;
+    font-style: italic;
+    line-height: 1.6;
+  }
+  .c1 .analogy { border-color: var(--accent1); }
+  .c2 .analogy { border-color: var(--accent2); }
+  .c3 .analogy { border-color: var(--accent4); }
+  .c4 .analogy { border-color: var(--accent5); }
+  .c5 .analogy { border-color: var(--accent3); }
+
+  /* Use case pill */
+  .usecase-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 14px;
+    font-weight: 600;
+  }
+
+  .usecase-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+
+  /* Legend */
+  .legend {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .legend h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .group-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <span class="label">Maschinelles Lernen · Klassifikation</span>
+  <h1>Klassifikations-Algorithmen<br>auf einen Blick</h1>
+  <p>Eine anfängerfreundliche Übersicht der wichtigsten Algorithmen — was sie können, wann man sie einsetzt und wie man sich merkt, wie sie funktionieren.</p>
+</div>
+
+<div class="container">
+
+  <!-- GROUP 1: PROBABILITY-BASED -->
+  <div class="category-label" style="color: var(--accent1);">🎲 Wahrscheinlichkeitsbasiert</div>
+  <p class="group-note">Diese Algorithmen nutzen Wahrscheinlichkeiten, um Vorhersagen zu treffen. Sie fragen: „Wie wahrscheinlich ist es, dass dieses Objekt zu Klasse X gehört?"</p>
+  <div class="grid">
+
+    <div class="card c1">
+      <span class="card-icon">🎯</span>
+      <div class="card-title">Naïve Bayes</div>
+      <div class="card-subtitle">Probabilistischer Klassifikator</div>
+      <hr>
+      <p class="card-desc">Berechnet Wahrscheinlichkeiten auf Basis des Bayes-Theorems. Geht vereinfachend davon aus, dass alle Merkmale (Features) unabhängig voneinander sind — daher „naiv".</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">📧 Spam-Filter, Textklassifikation</div>
+      <div class="analogy">💡 Wie ein Arzt, der aus einzelnen Symptomen eine Diagnose ableitet — als ob jedes Symptom unabhängig vom anderen wäre.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Einfach</span>
+        <span class="tag">Schnell</span>
+        <span class="tag">Interpretierbar</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Sehr schnell, funktioniert gut bei Texten & kleinen Datensätzen</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Annahme der Unabhängigkeit oft unrealistisch</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GROUP 2: LINEAR -->
+  <div class="category-label" style="color: var(--accent2); margin-top: 50px;">📏 Lineare Klassifikatoren</div>
+  <p class="group-note">Diese Algorithmen ziehen eine gerade Linie (oder Ebene) durch die Daten, um Klassen zu trennen. Funktioniert gut, wenn die Klassen klar separierbar sind.</p>
+  <div class="grid">
+
+    <div class="card c2">
+      <span class="card-icon">📈</span>
+      <div class="card-title">Linear Classifier</div>
+      <div class="card-subtitle">Linearer Entscheidungsklassifikator</div>
+      <hr>
+      <p class="card-desc">Zieht eine gerade Linie (in 2D) oder eine Hyperebene (in höheren Dimensionen) durch den Datenraum, um zwei Klassen zu trennen.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">📦 Einfache Trennprobleme, Basislösungen</div>
+      <div class="analogy">💡 Wie eine Grenzlinie auf einer Landkarte: alles links → Klasse A, alles rechts → Klasse B.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Einfach</span>
+        <span class="tag">Schnell</span>
+        <span class="tag">Nur linear trennbar</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Sehr einfach, gut als erster Ansatz</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Versagt bei komplexen, nicht-linearen Daten</div>
+      </div>
+    </div>
+
+    <div class="card c2">
+      <span class="card-icon">🔢</span>
+      <div class="card-title">Logistic Regression</div>
+      <div class="card-subtitle">Logistische Regression</div>
+      <hr>
+      <p class="card-desc">Trotz des Namens kein Regressions-, sondern ein Klassifikationsalgorithmus. Gibt für jede Klasse eine Wahrscheinlichkeit aus (zwischen 0 und 1) und trifft auf dieser Basis die Entscheidung.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🏥 Kreditrisiko, Krankheitsdiagnose, Binary-Klassifikation</div>
+      <div class="analogy">💡 Wie eine Skala: statt Ja/Nein gibt es „70% Wahrscheinlichkeit, dass es Spam ist".</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Interpretierbar</span>
+        <span class="tag">Schnell</span>
+        <span class="tag">Starker Baseline</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Sehr gut erklärbar, starker Ausgangspunkt</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Funktioniert nur bei linear trennbaren Klassen gut</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GROUP 3: NONLINEAR / INSTANCE-BASED -->
+  <div class="category-label" style="color: var(--accent4); margin-top: 50px;">🌀 Nicht-lineare &amp; Instanz-basierte Klassifikatoren</div>
+  <p class="group-note">Diese Algorithmen können komplexe, gebogene Entscheidungsgrenzen abbilden — ideal wenn die Daten sich nicht einfach durch eine Linie trennen lassen.</p>
+  <div class="grid">
+
+    <div class="card c3">
+      <span class="card-icon">🌊</span>
+      <div class="card-title">Nonlinear Classifier</div>
+      <div class="card-subtitle">Nicht-linearer Klassifikator (allgemein)</div>
+      <hr>
+      <p class="card-desc">Überbegriff für Klassifikatoren, die keine gerade Linie, sondern gebogene oder unregelmäßige Entscheidungsgrenzen erzeugen können. Notwendig z.B. beim XOR-Problem.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🔀 Wenn Daten komplex vermischt sind</div>
+      <div class="analogy">💡 Statt einer geraden Linie: eine gebogene Kurve, die sich den Daten anpasst.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Flexibel</span>
+        <span class="tag">Komplex</span>
+        <span class="tag">Verschiedene Methoden</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Kann komplexe Muster erkennen</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Gefahr von Overfitting (zu sehr an Trainingsdaten angepasst)</div>
+      </div>
+    </div>
+
+    <div class="card c3">
+      <span class="card-icon">🗺️</span>
+      <div class="card-title">Nearest Neighbor (1-NN)</div>
+      <div class="card-subtitle">Nächster-Nachbar-Klassifikator</div>
+      <hr>
+      <p class="card-desc">Klassifiziert einen neuen Datenpunkt einfach nach dem ihm ähnlichsten bekannten Datenpunkt. Sehr intuitiv: „Schau, wer dein nächster Nachbar ist, und nimm dessen Klasse."</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🔍 Einfache Suche, kleine Datensätze</div>
+      <div class="analogy">💡 Wie auf einer Party: du weißt nicht wer du bist, aber du schaust wer neben dir steht und nimmst deren Gruppe an.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Intuitiv</span>
+        <span class="tag">Kein Training nötig</span>
+        <span class="tag">Langsam bei Vorhersage</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Sehr einfach zu verstehen und implementieren</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Sehr langsam bei großen Datenmengen, empfindlich gegenüber Ausreißern</div>
+      </div>
+    </div>
+
+    <div class="card c3">
+      <span class="card-icon">👥</span>
+      <div class="card-title">K-Nearest Neighbor (k-NN)</div>
+      <div class="card-subtitle">K-Nächste-Nachbarn</div>
+      <hr>
+      <p class="card-desc">Erweiterung von 1-NN: Statt nur dem nächsten Nachbar werden die k nächsten Nachbarn befragt und die häufigste Klasse unter ihnen gewinnt (Mehrheitsvotum).</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🎬 Empfehlungssysteme, Bilderkennung (kleine Daten)</div>
+      <div class="analogy">💡 Wie eine Abstimmung: du fragst deine 5 nächsten Freunde, was du essen sollst — die Mehrheit entscheidet.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Intuitiv</span>
+        <span class="tag">Sensitiv für Skalierung</span>
+        <span class="tag">Klein gut, groß langsam</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Einfach, robust bei kleinen Daten, kein Training</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Sehr langsam bei großen Datensätzen, Skalierung muss stimmen</div>
+      </div>
+    </div>
+
+    <div class="card c3">
+      <span class="card-icon">⚔️</span>
+      <div class="card-title">SVM – Support Vector Machine</div>
+      <div class="card-subtitle">Stützvektormaschine</div>
+      <hr>
+      <p class="card-desc">Findet die optimale Trennlinie zwischen Klassen — und zwar die, die den größtmöglichen Abstand (Margin) zu den nächsten Datenpunkten hat. Mit sogenannten „Kernels" kann die SVM auch nicht-lineare Grenzen ziehen.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🖼️ Bildklassifikation, Bioinformatik, Text</div>
+      <div class="analogy">💡 Stell dir vor, du trennst zwei Gruppen von Punkten mit einem möglichst breiten Korridor — die SVM optimiert genau diesen Abstand.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Sehr leistungsfähig</span>
+        <span class="tag">Kernel-Trick</span>
+        <span class="tag">Hyperparameter nötig</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Starke Performance, kein lokales Minimum, auch nicht-linear möglich</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Langsam bei sehr großen Daten, Hyperparameter-Tuning notwendig</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GROUP 4: TREE-BASED / ENSEMBLE -->
+  <div class="category-label" style="color: var(--accent5); margin-top: 50px;">🌳 Baum-basierte &amp; Ensemble-Methoden</div>
+  <p class="group-note">Diese Algorithmen bauen auf Entscheidungsbäumen auf. Einzelne Bäume sind einfach verständlich, aber kombinierte Methoden (Ensembles) sind oft die stärksten Klassifikatoren überhaupt.</p>
+  <div class="grid wide">
+
+    <div class="card c4">
+      <span class="card-icon">🌿</span>
+      <div class="card-title">Decision Tree</div>
+      <div class="card-subtitle">Entscheidungsbaum</div>
+      <hr>
+      <p class="card-desc">Stellt Entscheidungen als Baumstruktur dar. An jedem Knoten wird eine Frage gestellt (z.B. „Ist Feature 1 &lt; 4?"), je nach Antwort folgt man einem Ast weiter — bis man zu einer Klasse gelangt.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🏦 Kreditentscheidung, Medizin, Regelbasierte Systeme</div>
+      <div class="analogy">💡 Wie ein Entscheidungsdiagramm: „Ist es warm? → Ja → Ist es sonnig? → Ja → Strand!"</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Sehr interpretierbar</span>
+        <span class="tag">Schnell</span>
+        <span class="tag">Overfitting-Risiko</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Leicht zu verstehen & zu visualisieren</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Overfitting bei tiefen Bäumen, instabil</div>
+      </div>
+    </div>
+
+    <div class="card c4">
+      <span class="card-icon">🌲🌲🌲</span>
+      <div class="card-title">Random Forest</div>
+      <div class="card-subtitle">Zufälliger Wald (Ensemble)</div>
+      <hr>
+      <p class="card-desc">Baut viele Entscheidungsbäume gleichzeitig (parallel), jeder mit leicht unterschiedlichen Daten und Merkmalen. Das Endergebnis ist das Mehrheitsvotum aller Bäume — robuster als ein einzelner Baum.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">📊 Tabellarische Daten, Medizin, Finanzen</div>
+      <div class="analogy">💡 Statt einer Person fragen wir 500 verschiedene Experten — die Mehrheitsmeinung ist meist besser als die eine Meinung.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Robust</span>
+        <span class="tag">Parallel</span>
+        <span class="tag">Weniger interpretierbar</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Sehr robust, wenig Overfitting, starke Performance</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Schwer zu interpretieren, Hyperparameter-Tuning nötig</div>
+      </div>
+    </div>
+
+    <div class="card c4">
+      <span class="card-icon">📈→🌿</span>
+      <div class="card-title">Gradient Boosting</div>
+      <div class="card-subtitle">Sequenzielles Ensemble</div>
+      <hr>
+      <p class="card-desc">Baut Entscheidungsbäume sequenziell auf: Jeder neue Baum lernt aus den Fehlern des vorherigen Baumes. Kombiniert werden die Ergebnisse gewichtet — bessere Bäume haben mehr Gewicht.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🏆 Wettbewerbe, Tabellarische Daten, Prognosen</div>
+      <div class="analogy">💡 Wie ein Team, das lernend arbeitet: nach jeder Runde korrigiert der nächste Mitarbeiter die Fehler des Vorgängers.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Sehr stark</span>
+        <span class="tag">Sequenziell</span>
+        <span class="tag">Hyperparameter-sensitiv</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Oft stärkste Methode für tabellarische Daten</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Langsamer als Random Forest, Overfitting möglich</div>
+      </div>
+    </div>
+
+    <div class="card c4">
+      <span class="card-icon">⚡</span>
+      <div class="card-title">XGBoost</div>
+      <div class="card-subtitle">Extreme Gradient Boosting</div>
+      <hr>
+      <p class="card-desc">Eine hochoptimierte, skalierbare Implementierung von Gradient Boosting. Extrem schnell und leistungsstark — einer der meistgenutzten Algorithmen in Data-Science-Wettbewerben.</p>
+      <div class="usecase-title">Typischer Einsatz</div>
+      <div class="usecase-pill">🥇 Kaggle-Wettbewerbe, Business-Prognosen</div>
+      <div class="analogy">💡 Gradient Boosting mit Turbo: gleiche Idee, aber viel schneller und mit cleveren Optimierungen.</div>
+      <div class="tags" style="margin-top:12px;">
+        <span class="tag">Sehr schnell</span>
+        <span class="tag">State-of-the-Art</span>
+        <span class="tag">Komplex</span>
+      </div>
+      <div class="pros-cons">
+        <div class="pros"><span class="mini-label">✅ Stärken</span>Oft beste Vorhersagequalität, sehr effizient</div>
+        <div class="cons"><span class="mini-label">⚠️ Schwächen</span>Viele Hyperparameter, schwer zu interpretieren</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LEGEND / CHEAT SHEET -->
+  <div class="legend">
+    <h3>🗝️ Wann nehme ich welchen Algorithmus? — Kurz-Cheatsheet</h3>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent1);"></div>
+        <div><strong style="color:#fff;">Naïve Bayes</strong> → Texte, E-Mails, schnelle Lösung, wenig Daten</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent2);"></div>
+        <div><strong style="color:#fff;">Logistic Regression</strong> → Erklärbarkeit wichtig, binäre Klassifikation, Basislösung</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent4);"></div>
+        <div><strong style="color:#fff;">k-NN</strong> → Kleiner Datensatz, intuitive Lösung, Empfehlungen</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent4);"></div>
+        <div><strong style="color:#fff;">SVM</strong> → Komplexe Grenzen, mittlere Datenmenge, starke Performance gewünscht</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent5);"></div>
+        <div><strong style="color:#fff;">Decision Tree</strong> → Ergebnis muss erklärbar sein, Regeln gesucht</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent5);"></div>
+        <div><strong style="color:#fff;">Random Forest</strong> → Robuste Standardlösung, tabellarische Daten</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--accent5);"></div>
+        <div><strong style="color:#fff;">XGBoost</strong> → Maximale Genauigkeit gewünscht, Wettbewerbe, große Datensätze</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--muted);"></div>
+        <div><strong style="color:#fff;">Wichtig:</strong> Es gibt keinen universell besten Algorithmus — es kommt immer auf die Daten an!</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
