@@ -1,0 +1,18 @@
+Compute the IoU:
+
+4             -----> 4  --> 
+16 + 16 - 4 = 28 ---> 28  ---> => 0,14 * 100 = ca. 14 %
+
+
+Compute the IoU:
+Scenario 2:
+• Ground Truth Box: [2, 2, 4, 4] --> (2,2) to (6,6)
+• Predicted Box: [3, 3, 4, 4] --> (3,3) to (7,7)
+
+R.:
+
+9 -------------------------> 9 
+16 + 16 = 32 -9 = 23 ------> 23 => 0,3913 => 39,12 %
+- 
+
+Image size + Batch size runter stellen bei Problemen..
